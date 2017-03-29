@@ -8,12 +8,17 @@ public class MAWarrior {
     Depositer depositer;
     PageProcessor pageProcessor;
     Scheduler scheduler;
+    public static String baseUrl = "http://www.metal-archives.com/bands//";
 
     public MAWarrior(){
         scheduler = new Scheduler(startId, 10);
     }
 
     public static void main(String[] args) {
+        this.startFire();
+    }
+
+    private void startFire(){
 
     }
 }
