@@ -10,11 +10,21 @@ import java.net.URI;
 /**
  * Created by dongz on 2017/3/28.
  */
-class Downloader {
+public class Downloader {
+    private String url;
 
-    public void startFire() throws Exception {
+    public Downloader(String url){
+        this.url=url;
+        try{
+            download();
+        }catch(Exception e){
+            e.printStackTrace();
+        };
+    }
+
+    public void download() throws Exception{
         CloseableHttpClient client = HttpClients.createDefault();
-        URI uri = new URIBuilder("http://www.metal-archives.com/bands/emperor/30").build();
+        URI uri = new URIBuilder(url).build();
         HttpGet httpGet = new HttpGet(uri);
         HttpResponse response = client.execute(httpGet);
         HttpEntity entity = response.getEntity();
@@ -25,7 +35,7 @@ class Downloader {
 //        while ((tmp = br.readLine()) != null) {
 //            finalText.append(tmp).append("\n");
 //        }
-        System.out.println(response.getStatusLine());
+        System.out.println("current band id was "+url+" : "+response.getStatusLine());
         client.close();
     }
 
