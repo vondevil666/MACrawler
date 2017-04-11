@@ -5,6 +5,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 /**
@@ -12,6 +14,7 @@ import java.net.URI;
  */
 public class Downloader {
     private String url;
+    private StringBuffer targetText;
 
     public Downloader(String url){
         this.url=url;
@@ -29,14 +32,15 @@ public class Downloader {
         HttpResponse response = client.execute(httpGet);
         HttpEntity entity = response.getEntity();
 
-//        BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));
-//        String tmp = "";
-//        StringBuffer finalText = new StringBuffer();
-//        while ((tmp = br.readLine()) != null) {
-//            finalText.append(tmp).append("\n");
-//        }
-        System.out.println("current band id was "+url+" : "+response.getStatusLine());
+        if(response.getStatusLine().getStatusCode()!=200)return;
+        BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));
+        String tmp = "";
+        targetText = new StringBuffer();
+        while ((tmp = br.readLine()) != null) {
+            targetText.append(tmp);
+        }
         client.close();
+        new PageProcessor(targetText);    //交给pageProcessor处理
     }
 
 }
