@@ -23,8 +23,9 @@ public class PageProcessor {
 //                if (e.html().charAt(0) == '<') continue;
                 if(elementFilter(e)==false)continue;
             } catch (Exception e1){};
-            e.prepend("=");
-            e.append("=");
+//            e.prepend("=");
+//            e.append("=");
+            e.text(new TKProcessor().getTKValue(e.text()));
         }
         new PipeLine(doc.outerHtml());
     }

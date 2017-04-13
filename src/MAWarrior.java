@@ -10,7 +10,6 @@ public class MAWarrior {
     Scheduler scheduler;
     private int startId = 1;      //抓数据的起始乐队id
 
-
     public MAWarrior() {
         scheduler = new Scheduler(startId, 2);
     }

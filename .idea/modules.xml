@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/GoogleTranslationTKProcessor/GoogleTranslationTKProcessor.iml" filepath="$PROJECT_DIR$/GoogleTranslationTKProcessor/GoogleTranslationTKProcessor.iml" />
       <module fileurl="file://$PROJECT_DIR$/MACrawler.iml" filepath="$PROJECT_DIR$/MACrawler.iml" />
     </modules>
   </component>
