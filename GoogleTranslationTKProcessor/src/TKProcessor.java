@@ -10,16 +10,18 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static javafx.scene.input.KeyCode.L;
+
 /**
  * Created by dongz on 2017/4/11.
  * 通过translate.google.cn翻译文本，需要先从网站获取tk值，才能通过ajax访问服务器获得翻译结果
  * 首次访问translate.google.cn能够获得TKK值，TKK与待翻译字符串共同算出tk值
  */
 public class TKProcessor {
-    private String tk="";
+    private String tk = "";
     private long[] tkk = null;
     private static String url = "https://translate.google.cn";
-    private String targetString = "masteere sdf asdfawe";
+    private String targetString = "fineday";
 
     public static void main(String[] args) {
         TKProcessor tkp = new TKProcessor();
@@ -27,26 +29,26 @@ public class TKProcessor {
     }
 
     public String getTKValue(String targetString) {
-        this.targetString =targetString;
-        TKProcessor tkp=new TKProcessor();
-        tk=tkp.visitTG();
+        this.targetString = targetString;
+        TKProcessor tkp = new TKProcessor();
+        tk = tkp.visitTG();
         return getJason(combineURL());
     }
 
-    private String combineURL(){
-        StringBuffer sb=new StringBuffer();
+    private String combineURL() {
+        StringBuffer sb = new StringBuffer();
         for (char c : targetString.toCharArray()) {
-            if(c!=' ') sb.append(c);
+            if (c != ' ') sb.append(c);
             else sb.append("%20");
         }
         System.out.println(sb.toString());
-        String s="https://translate.google.cn/translate_a/single?client=t&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&source=bh&otf=1&ssel=0&tsel=0&kc=1&tk="+tk+"&q="+sb.toString();
+        String s = "https://translate.google.cn/translate_a/single?client=t&sl=en&tl=zh-CN&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&source=bh&otf=1&ssel=0&tsel=0&kc=1&tk=" + tk + "&q=" + sb.toString();
         System.out.println(s);
         return s;
     }
 
-    private String getJason(String targetUrl){
-        StringBuffer sb1=new StringBuffer();
+    private String getJason(String targetUrl) {
+        StringBuffer sb1 = new StringBuffer();
         try {
 
             CloseableHttpClient client = HttpClients.createDefault();
@@ -62,14 +64,14 @@ public class TKProcessor {
                 while ((tmp = br.readLine()) != null) {
                     sb.append(tmp);
                 }
-                int flag=0;
+                int flag = 0;
                 for (char c : sb.toString().toCharArray()) {
-                    if(c=='\"'){
+                    if (c == '\"') {
                         flag++;
                         continue;
                     }
-                    if(flag==1) sb1.append(c);
-                    else if(flag==2)break;
+                    if (flag == 1) sb1.append(c);
+                    else if (flag == 2) break;
                 }
                 System.out.println(sb1);
             }
@@ -95,9 +97,10 @@ public class TKProcessor {
                 while ((tmp = br.readLine()) != null) {
                     if (tmp.contains("TKK")) {
                         tkk = tkkFinder(tmp);
+//                        System.out.println(tmp);  //打印含tkk的原始语句
                     }
                 }
-                tk=getTK();
+                tk = getTK();
                 System.out.println(tk);
             }
         } catch (Exception e) {
@@ -120,7 +123,7 @@ public class TKProcessor {
                         g[d++] = c >> 18 | 240;
                         g[d++] = c >> 12 & 63 | 128;
                     } else {
-                        g[d++]=c>>12|224;
+                        g[d++] = c >> 12 | 224;
                     }
                     g[d++] = c >> 6 & 63 | 128;
                 }
@@ -133,26 +136,43 @@ public class TKProcessor {
             a = functionB(a, "+-a^+6");
         }
         a = functionB(a, "+-3^+b+-f");
-        a ^= (tkk[0]+tkk[1]);
+        System.out.println("before  "+a);
+//        a ^= (tkk[0] + tkk[1]);
+        long b=(tkk[0] + tkk[1]) & 0xfffffffL;
+        a^=b;
+        System.out.println("after  "+a);
         a = (a & 2147483647) + 2147483648L;
         a %= 1000000;
         return tk = a + "." + (a ^ tkk[2]);
     }
 
+    int ttt=0;
     private long functionB(long a, String b) {
-        for (int d = 0; d < b.length() - 2; d += 3) {
-            long c =  b.charAt(d + 2);
+//        System.out.println(a + " | " + b);
+        ttt++;
 
+        for (int d = 0; d < b.length() - 2; d += 3) {
+            long c = b.charAt(d + 2);
             if (97 <= c) {
                 c = c - 87;
-            }else c=c-48;
+            } else c = c - 48;
             if (b.charAt(d + 1) == '+') {
-                c = a >> c;
+//                System.out.println("c="+c+"   a="+a);
+                c = (int)a >>> c;
+//                System.out.println("after process c="+c);
             } else {
-                c = a << c;
+                c = (int) a << c;
             }
             if (b.charAt(d) == '+') {
-                a = a + c & 4294967295L;
+                a = (a + c);
+                //以下算法是当a在2^31以内时原样返回a，在2^31之外则返回2^32-a,再取负
+//                a=a& 4294967295L;//原公式
+                if (a < (-1* (Math.pow(2,31)))) {
+                    a = (long)Math.pow(2,32) + a;
+                }
+                else if (a-(Math.pow(2,31)) > 0) {
+                    a = a - (long)Math.pow(2, 32);
+                }
             } else {
                 a = a ^ c;
             }
@@ -170,9 +190,9 @@ public class TKProcessor {
             t[0] = Long.parseLong(m.group(1));
             t[1] = Long.parseLong(m.group(2));
             t[2] = Long.parseLong(m.group(3));
-//            t[0]=288894470L;
-//                    t[1]=1562492414L;
-//                            t[2]=414464;
+            t[0] = 4145352448L;
+            t[1] = 72982085L;
+            t[2] = 414481;
 //            System.out.println(t[0]+"   "+t[1]+"   "+t[2]);
         } else System.out.println("从translate.google.cn获取tkk失败");
         return t;
