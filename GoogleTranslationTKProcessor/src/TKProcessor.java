@@ -21,7 +21,7 @@ public class TKProcessor {
     private String tk = "";
     private long[] tkk = null;
     private static String url = "https://translate.google.cn";
-    private String targetString = "fineday";
+    public String targetString = "Progressive/Death/Doom Metal (early), Melodic Heavy Metal/Rock (later)";
 
     public static void main(String[] args) {
         TKProcessor tkp = new TKProcessor();
@@ -56,7 +56,7 @@ public class TKProcessor {
             HttpGet get = new HttpGet(uri);
             HttpResponse response = client.execute(get);
             if (response.getStatusLine().getStatusCode() != 200) {
-                System.out.println("访问网站失败1");
+                System.out.println("访问网站失败1"+response.getStatusLine().getStatusCode());
             } else {
                 BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
                 StringBuilder sb = new StringBuilder();
@@ -136,12 +136,14 @@ public class TKProcessor {
             a = functionB(a, "+-a^+6");
         }
         a = functionB(a, "+-3^+b+-f");
-        System.out.println("before  "+a);
 //        a ^= (tkk[0] + tkk[1]);
-        long b=(tkk[0] + tkk[1]) & 0xfffffffL;
+        int b=(int)((tkk[0] + tkk[1]) & 0xff_fff_fffL);
         a^=b;
+        System.out.println("before  "+a);
+        if(a<0) {
+            a = ((int) a & 2147483647) + 2147483648L;
+        }
         System.out.println("after  "+a);
-        a = (a & 2147483647) + 2147483648L;
         a %= 1000000;
         return tk = a + "." + (a ^ tkk[2]);
     }
@@ -190,9 +192,9 @@ public class TKProcessor {
             t[0] = Long.parseLong(m.group(1));
             t[1] = Long.parseLong(m.group(2));
             t[2] = Long.parseLong(m.group(3));
-            t[0] = 4145352448L;
-            t[1] = 72982085L;
-            t[2] = 414481;
+//            t[0] = 4145352448L;
+//            t[1] = 72982085L;
+//            t[2] = 414481;
 //            System.out.println(t[0]+"   "+t[1]+"   "+t[2]);
         } else System.out.println("从translate.google.cn获取tkk失败");
         return t;
